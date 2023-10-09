@@ -1,0 +1,29 @@
+cyberdolphin:
+  gradio_chat_interface:
+    src: "http://localhost:7860"
+  prompts:
+    default_prompt:
+      prefix: >-
+        make a list of the things you see. do not explain why you see them.
+        do explain what the things you see are doing. do explain where they are.
+        do not explain their purpose,
+        do not say anything other than the list of things you see.
+        do use purely objective language: do not say "I see a..." but instead say "there is a..."
+        SO:
+        When I provide the list "
+
+
+      suffix: >-
+        ",
+        what is this scene -
+        do not simply repeat the list, do not say "when I provide the list" or similar just project the description.
+        describe what you see in your mind.
+        
+
+    prompt_two:
+      prefix: >-
+        describe a scene using the following list of objects: "
+      suffix: >-
+        " - there are many things
+        and you must list them using a maximum of 25 words. be clear and specific.
+        use present tense, objective language: do not say, "I see ..." rather say, "there is ..."
