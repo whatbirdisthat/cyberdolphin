@@ -6,7 +6,7 @@ Git clone this repo into the `custom_nodes` folder. If necessary, check the pip 
 
 ## Examples
 There are workflows in the [examples folder](./examples)
-
+![img.png](examples/img.png)
 ---
 ## Nodes
 
