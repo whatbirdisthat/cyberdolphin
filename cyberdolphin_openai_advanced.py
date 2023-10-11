@@ -1,5 +1,7 @@
 import openai
-from .settings import load_settings
+
+from .openai_client import OpenAiClient
+from .settings import load_settings, api_settings
 
 
 class CyberdolphinOpenAIAdvanced:
@@ -8,16 +10,17 @@ class CyberdolphinOpenAIAdvanced:
     @classmethod
     def INPUT_TYPES(s):
         the_settings = load_settings()
-        openai_settings = the_settings['openai']
-        openai.api_base = openai_settings['api_base']
-        openai.api_key = openai_settings['api_key']
-        openai.organization = openai_settings['organisation']
+        openai.api_base, openai.api_key, openai.organization = api_settings('openai')
+        openai_model_list = [m["id"] for m in openai.Model.list()['data']]
         example_system_prompt = the_settings['prompt_templates']['gpt-3.5-turbo']['system']
-        example_user_prompt = f"{the_settings['prompt_templates']['gpt-3.5-turbo']['prefix']}{the_settings['example_user_prompt']}{the_settings['prompt_templates']['gpt-3.5-turbo']['suffix']}"
+        example_user_prompt = f"\
+        {the_settings['prompt_templates']['gpt-3.5-turbo']['prefix']}\
+        {the_settings['example_user_prompt']}\
+        {the_settings['prompt_templates']['gpt-3.5-turbo']['suffix']}"
 
         return {
             "required": {
-                "model": ([m["id"] for m in openai.Model.list()['data']], {
+                "model": (openai_model_list, {
                     "default": "gpt-3.5-turbo"}),
                 "system_prompt": ('STRING', {
                     "multiline": True,
@@ -56,14 +59,10 @@ class CyberdolphinOpenAIAdvanced:
         if temperature < 0 or temperature > 2:
             errors_list.append(
                 """Temperature should be a value between 0.0 and 2.0
-                 - higher values like 0.8 will make the output more random,
+                 - openai says higher values like 0.8 will make the output more random,
                  lower values like 0.2 make it more focused and deterministic.
                  """)
         return errors_list
-
-    def api_settings(self):
-        openai_settings = load_settings()['openai']
-        return openai_settings['api_base'], openai_settings['api_key'], openai_settings['organisation']
 
     def generate(self, model: str, system_prompt: str, user_prompt="",
                  temperature: float | None = None, top_p: float | None = None):
@@ -72,28 +71,29 @@ class CyberdolphinOpenAIAdvanced:
             error_report = "\n".join([e for e in errors])
             raise RuntimeError(f"There were problems with the parameters:\n{error_report}")
         else:
-
             system_content = system_prompt
             user_content = user_prompt
-            if top_p == 0.0:
-                openai.api_base, openai.api_key, openai.organization = self.api_settings()
-                response = openai.ChatCompletion.create(
-                    model=model,
-                    temperature=temperature,
-                    messages=[
-                        {"role": "system", "content": system_content},
-                        {"role": "user", "content": user_content}
-                    ]
-                )
-            else:
-                openai.api_base, openai.api_key, openai.organization = self.api_settings()
-                response = openai.ChatCompletion.create(
-                    model=model,
-                    top_p=top_p,
-                    messages=[
-                        {"role": "system", "content": system_content},
-                        {"role": "user", "content": user_content}
-                    ]
-                )
+
+            if top_p == 0.0 or top_p == 1.0:
+                top_p = int(top_p)
+
+            response = OpenAiClient.complete(
+                key="openai",
+                model=model,
+                temperature=temperature,
+                top_p=top_p,
+                system_content=system_content,
+                user_content=user_content)
+
+            # openai.api_base, openai.api_key, openai.organization = api_settings()
+            # response = openai.ChatCompletion.create(
+            #     model=model,
+            #     temperature=temperature,
+            #     top_p=top_p,
+            #     messages=[
+            #         {"role": "system", "content": system_content},
+            #         {"role": "user", "content": user_content}
+            #     ]
+            # )
 
             return (f'{response.choices[0].message.content}',)

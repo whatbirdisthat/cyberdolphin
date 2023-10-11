@@ -1,5 +1,7 @@
 import openai
-from .settings import load_settings
+
+from .openai_client import OpenAiClient
+from .settings import load_settings, api_settings
 
 all_settings = load_settings()
 prompt_templates = all_settings['prompt_templates']
@@ -12,22 +14,19 @@ default_user_prompt = all_settings['example_user_prompt']
 
 class CyberdolphinOpenAICompatible:
     the_settings = None
-    def api_settings(self):
-        openai_settings = load_settings()['openai_compatible']
-        return openai_settings['api_base'], openai_settings['api_key'], openai_settings['organisation']
 
     @classmethod
     def INPUT_TYPES(s):
-        openai.api_key = openai_settings['api_key']
-        openai.organization = openai_settings['organisation']
-        openai.api_base = openai_settings['api_base']
+        openai.api_base, openai.api_key, openai.organization = api_settings('openai_compatible')
         available_models = [m["id"] for m in openai.Model.list()['data']]
+        available_templates = [t for t in prompt_templates]
+
         return {
             "required": {
-                "api_base": ("STRING", {
-                    "default": openai_settings['api_base']
-                }),
-                "prompt_template": ([t for t in prompt_templates], {
+                # "api_base": ("STRING", {
+                #     "default": openai_settings['api_base']
+                # }),
+                "prompt_template": (available_templates, {
                     "default": 'default'
                 }),
                 "model": (available_models, {
@@ -69,11 +68,9 @@ class CyberdolphinOpenAICompatible:
                  """)
         return errors_list
 
-    def generate(self, api_base: str, prompt_template: str, model: str, temperature: float | None = None,
+    def generate(self, prompt_template: str, model: str, temperature: float | None = None,
                  top_p: float | None = None, user_prompt=""):
         errors = self.validate_content(temperature, top_p)
-        if top_p == 0.0:
-            top_p = None
         if errors:
             error_report = "\n".join([e for e in errors])
             raise RuntimeError(f"There were problems with the parameters:\n{error_report}")
@@ -83,29 +80,12 @@ class CyberdolphinOpenAICompatible:
             system_content = this_prompt['system']
             user_content = f"{this_prompt['prefix']} {user_prompt} {this_prompt['suffix']}"
 
-            openai.api_base, openai.api_key, openai.organization = self.api_settings()
-
-            # openai_settings = load_settings()['openai_compatible']
-            # openai.api_base = openai_settings['api_base']
-            # openai.api_key = openai_settings['api_key']
-            # openai.organization = openai_settings['organisation']
-            if top_p is None:
-                response = openai.ChatCompletion.create(
-                    model=model,
-                    temperature=temperature,
-                    messages=[
-                        {"role": "system", "content": system_content},
-                        {"role": "user", "content": user_content}
-                    ]
-                )
-            else:
-                response = openai.ChatCompletion.create(
-                    model=model,
-                    top_p=top_p,
-                    messages=[
-                        {"role": "system", "content": system_content},
-                        {"role": "user", "content": user_content}
-                    ]
-                )
+            response = OpenAiClient.complete(
+                key="openai_compatible",
+                model=model,
+                temperature=temperature,
+                top_p=top_p,
+                system_content=system_content,
+                user_content=user_content)
 
             return (f'{response.choices[0].message.content}',)

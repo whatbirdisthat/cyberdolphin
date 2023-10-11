@@ -38,3 +38,8 @@ def load_settings():
         the_yaml = yaml.safe_load(settings)
     # print(f'LOADED: {the_yaml["cyberdolphin"]}')
     return the_yaml['cyberdolphin']
+
+
+def api_settings(section: str = "openai"):
+    openai_settings = load_settings()[section]
+    return openai_settings['api_base'], openai_settings['api_key'], openai_settings['organisation']

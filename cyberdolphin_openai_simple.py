@@ -1,4 +1,4 @@
-import openai
+from .openai_client import OpenAiClient
 from .settings import load_settings
 
 
@@ -27,28 +27,17 @@ class CyberdolphinOpenAISimple:
     # OUTPUT_NODE = False
 
     CATEGORY = "🐬 CyberDolphin"
-    def api_settings(self):
-        openai_settings = load_settings()['openai']
-        return openai_settings['api_base'], openai_settings['api_key'], openai_settings['organisation']
 
     def generate(self, user_prompt="", temperature: float = 1.0):
         prompts = load_settings()['prompt_templates']
-        system_prompt = prompts['gpt-3.5-turbo']['system']
+        system_content = prompts['gpt-3.5-turbo']['system']
         user_content = f"{prompts['gpt-3.5-turbo']['prefix']} {user_prompt} {prompts['gpt-3.5-turbo']['suffix']}"
-
-        # openai_settings = load_settings()['openai']
-        # openai.api_base = openai_settings['api_base']
-        # openai.api_key = openai_settings['api_key']
-        # openai.organization = openai_settings['organisation']
-        openai.api_base, openai.api_key, openai.organization = self.api_settings()
-
-        response = openai.ChatCompletion.create(
+        response = OpenAiClient.complete(
+            key="openai_compatible",
             model=load_settings()['openai']['default_model'],
             temperature=temperature,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_content}
-            ]
-        )
+            top_p=1.0,
+            system_content=system_content,
+            user_content=user_content)
 
         return (f'{response.choices[0].message.content}',)
