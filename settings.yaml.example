@@ -2,14 +2,21 @@ cyberdolphin:
   gradio_chat_interface:
     src: http://localhost:7860
   openai_compatible:
-    api_base: 'http://localhost:8000/v1'
-    organisation: "NONE"
-    api_key: "NONE"
-  openai:
-    api_base: 'https://api.openai.com/v1'
-    organisation: "ORG"
-    api_key: "KEY"
-    model: "gpt-3.5-turbo"
+    openai:
+      api_base: 'https://api.openai.com/v1'
+      organisation: "ORG"
+      api_key: "KEY"
+      model: "gpt-3.5-turbo"
+    local_vllm_openai_api:
+      api_base: "http://127.0.0.1:8000/v1"
+      organisation: "NONE"
+      api_key: "NONE"
+      model: "Llama-2-13b-chat"
+    another_openai_api:
+      api_base: "http://127.0.0.1:8001/v1"
+      organisation: "NONE"
+      api_key: "NONE"
+      model: "another_model"
   example_user_prompt: "{Camel|goldfish|glowing orb},{moss|tree|fern|balloon},{space station|garden shed|glowing laser sword|bowl of petunias|orange taxi|neon sign}"
   prompt_templates:
 #    the user prompt is by default a list of objects, such as what might be returned from a resnet node

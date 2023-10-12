@@ -9,14 +9,15 @@ class CyberdolphinOpenAIAdvanced:
 
     @classmethod
     def INPUT_TYPES(s):
-        the_settings = load_settings()
         openai.api_base, openai.api_key, openai.organization = api_settings('openai')
         openai_model_list = [m["id"] for m in openai.Model.list()['data']]
-        example_system_prompt = the_settings['prompt_templates']['gpt-3.5-turbo']['system']
+        the_settings = load_settings()
+        gpt_prompt = the_settings['prompt_templates']['gpt-3.5-turbo']
+        example_system_prompt = gpt_prompt['system']
         example_user_prompt = f"\
-        {the_settings['prompt_templates']['gpt-3.5-turbo']['prefix']}\
-        {the_settings['example_user_prompt']}\
-        {the_settings['prompt_templates']['gpt-3.5-turbo']['suffix']}"
+{gpt_prompt['prefix']}\
+{the_settings['example_user_prompt']}\
+{gpt_prompt['suffix']}"
 
         return {
             "required": {
@@ -31,69 +32,46 @@ class CyberdolphinOpenAIAdvanced:
                     "default": example_user_prompt
                 }),
                 "temperature": ("FLOAT", {
-                    "default": 1
+                    "default": 1.0, "min": 0.0, "max": 2.0, "step": 0.01,
+                    "help": """
+                            What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the
+                            output more random, while lower values like 0.2 will make it more focused and deterministic.
+                            
+                            We generally recommend altering this or top_p but not both.
+                    """
+
                 }),
             },
             "optional": {
                 "top_p": ("FLOAT", {
-                    "default": None
+                    "default": 1.0, "min": 0.001, "max": 1.0, "step": 0.01,
+                    "help": """
+                            An alternative to sampling with temperature, called nucleus sampling, where the model
+                            considers the results of the tokens with top_p probability mass.
+                            So 0.1 means only the tokens comprising the top 10% probability mass are considered.
+                            
+                            We generally recommend altering this or `temperature` but not both.
+                    """
                 }),
             }
         }
 
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("gpt_response",)
-
     FUNCTION = "generate"
-
-    # OUTPUT_NODE = False
-
     CATEGORY = "🐬 CyberDolphin"
-
-    def validate_content(self, temperature: float, top_p: float = None) -> list[str]:
-        errors_list = []
-        if temperature is None and top_p is None:
-            errors_list.append('Must contain a temperature or a top_p')
-        if top_p < 0 or top_p > 1:
-            errors_list.append('top_p must be a number between 0 and 1')
-        if temperature < 0 or temperature > 2:
-            errors_list.append(
-                """Temperature should be a value between 0.0 and 2.0
-                 - openai says higher values like 0.8 will make the output more random,
-                 lower values like 0.2 make it more focused and deterministic.
-                 """)
-        return errors_list
 
     def generate(self, model: str, system_prompt: str, user_prompt="",
                  temperature: float | None = None, top_p: float | None = None):
-        errors = self.validate_content(temperature, top_p)
-        if errors:
-            error_report = "\n".join([e for e in errors])
-            raise RuntimeError(f"There were problems with the parameters:\n{error_report}")
-        else:
-            system_content = system_prompt
-            user_content = user_prompt
+        system_content = system_prompt
+        user_content = user_prompt
 
-            if top_p == 0.0 or top_p == 1.0:
-                top_p = int(top_p)
+        response = OpenAiClient.complete(
+            key="openai",
+            model=model,
+            temperature=temperature,
+            top_p=top_p,
+            system_content=system_content,
+            user_content=user_content)
 
-            response = OpenAiClient.complete(
-                key="openai",
-                model=model,
-                temperature=temperature,
-                top_p=top_p,
-                system_content=system_content,
-                user_content=user_content)
-
-            # openai.api_base, openai.api_key, openai.organization = api_settings()
-            # response = openai.ChatCompletion.create(
-            #     model=model,
-            #     temperature=temperature,
-            #     top_p=top_p,
-            #     messages=[
-            #         {"role": "system", "content": system_content},
-            #         {"role": "user", "content": user_content}
-            #     ]
-            # )
-
-            return (f'{response.choices[0].message.content}',)
+        return (f'{response.choices[0].message.content}',)

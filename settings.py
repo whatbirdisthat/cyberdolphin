@@ -41,5 +41,5 @@ def load_settings():
 
 
 def api_settings(section: str = "openai"):
-    openai_settings = load_settings()[section]
+    openai_settings = load_settings()['openai_compatible'][section]
     return openai_settings['api_base'], openai_settings['api_key'], openai_settings['organisation']
