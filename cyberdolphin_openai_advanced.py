@@ -14,10 +14,7 @@ class CyberdolphinOpenAIAdvanced:
         the_settings = load_settings()
         gpt_prompt = the_settings['prompt_templates']['gpt-3.5-turbo']
         example_system_prompt = gpt_prompt['system']
-        example_user_prompt = f"\
-{gpt_prompt['prefix']}\
-{the_settings['example_user_prompt']}\
-{gpt_prompt['suffix']}"
+        example_user_prompt = f"{gpt_prompt['prefix']}{the_settings['example_user_prompt']}{gpt_prompt['suffix']}"
 
         return {
             "required": {
