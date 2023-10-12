@@ -1,14 +1,11 @@
 import hashlib
-import os
 
-from PIL import Image, ImageOps
+from PIL import ImageOps
 import torch
 import numpy as np
 
 import folder_paths
-from .openai_client import convert_bson_to_image, OpenAiClient
-from .settings import load_settings
-import openai
+from .openai_client import OpenAiClient
 
 
 class CyberDolphinImageneering:
@@ -36,8 +33,9 @@ class CyberDolphinImageneering:
 
         """
         i = OpenAiClient.image_create(prompt=prompt, size=size)
-        i = ImageOps.exif_transpose(i)
 
+        # copy/pasted from class LoadImage:
+        i = ImageOps.exif_transpose(i)
         image = i.convert("RGB")
         image = np.array(image).astype(np.float32) / 255.0
         image = torch.from_numpy(image)[None,]
@@ -46,7 +44,7 @@ class CyberDolphinImageneering:
             mask = 1. - torch.from_numpy(mask)
         else:
             mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
-        return (image, mask.unsqueeze(0))
+        return image, mask.unsqueeze(0)
 
     @classmethod
     def IS_CHANGED(s, image):

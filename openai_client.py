@@ -19,7 +19,7 @@ def validation(temperature: float, top_p: float = None) -> list[str]:
     return errors_list
 
 
-def convert_bson_to_image(image_bson: str):
+def convert_bson_to_image(image_bson: str) -> PIL.Image.Image:
     import base64
     import io
     from PIL import Image
