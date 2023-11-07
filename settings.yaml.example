@@ -7,7 +7,7 @@ cyberdolphin:
       organisation: "ORG"
       api_key: "KEY"
       model: "gpt-3.5-turbo"
-    local_vllm_openai_api:
+    default:
       api_base: "http://127.0.0.1:8000/v1"
       organisation: "NONE"
       api_key: "NONE"
