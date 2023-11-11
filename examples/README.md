@@ -2,6 +2,8 @@
 
 ## Cyber Dolphin
 
+![cyberdolphin_example.png](cyberdolphin_example.png)
+
 ---
 
 Get image prompt from OpenAI or a compatible API. By default `gpt-3.5-turbo` is used.

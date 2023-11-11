@@ -1,6 +1,9 @@
 # cyberdolphin
 
-The dolphin is wiring up local models and / or APIs.
+The dolphin is wiring up OpenAI and local LLMs. OpenAI v1.2.3 is required.
+
+![cyberdolphin.png](examples/cyberdolphin.png)
+
 
 ## Installation
 
@@ -36,17 +39,21 @@ Runs the prompt gpt-3.5-turbo (or a user-selected alternative) with the text.
 ### OpenAI Compatible Node
 
 **REQUIRES** STRING `text`
+
 The text is embedded in the user prompt.
 Generates an "engineered" prompt from template.
 The user text is embedded in the engineered prompt.
 Calls for completion of the prompt to the user-defined URL.
+
 **PRODUCES** STRING
 
 ### OpenAI DALL·E Node
 
 **REQUIRES** STRING `text`
+
 Calls OpenAI DALL·E with the text.
-**PRODUCES** STRING
+
+**PRODUCES** IMAGE
 
 
 ---

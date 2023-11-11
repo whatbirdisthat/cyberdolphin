@@ -1,7 +1,5 @@
-import openai
-
 from .openai_client import OpenAiClient
-from .settings import load_settings, api_settings
+from .settings import load_settings
 
 
 class CyberdolphinOpenAIAdvanced:
@@ -9,8 +7,7 @@ class CyberdolphinOpenAIAdvanced:
 
     @classmethod
     def INPUT_TYPES(s):
-        openai.api_base, openai.api_key, openai.organization = api_settings('openai')
-        openai_model_list = [m["id"] for m in openai.Model.list()['data']]
+        openai_model_list = OpenAiClient.model_list()
         the_settings = load_settings()
         gpt_prompt = the_settings['prompt_templates']['gpt-3.5-turbo']
         example_system_prompt = gpt_prompt['system']

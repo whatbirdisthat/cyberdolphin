@@ -1,7 +1,7 @@
 from PIL import ImageOps
 import torch
 import numpy as np
-from .openai_client import OpenAiClient
+from .openai_client import OpenAiClient, DALL_E_SIZE
 
 
 class CyberDolphinImageneering:
@@ -16,7 +16,7 @@ class CyberDolphinImageneering:
     RETURN_TYPES = ("IMAGE", "MASK")
     FUNCTION = "load_image"
 
-    def load_image(self, prompt: str, size: str):
+    def load_image(self, prompt: str, size: DALL_E_SIZE):
         i = OpenAiClient.image_create(prompt=prompt, size=size)
         # copy/pasted from class LoadImage:
         i = ImageOps.exif_transpose(i)
