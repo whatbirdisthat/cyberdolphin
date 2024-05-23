@@ -1,6 +1,6 @@
 [project]
 name = "cyberdolphin"
-description = "Cyberdolphin Suite of ComfyUI nodes for wiring up things."
+description = "Cyberdolphin nodes for wiring up OpenAI and compatible LLM APIs."
 version = "1.0.0"
 license = "LICENSE"
 dependencies = ["openai ~= 1.2.3", "gradio_client", "numpy", "pillow"]
@@ -10,6 +10,6 @@ Repository = "https://github.com/whatbirdisthat/cyberdolphin"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = ""
+PublisherId = "whatbirdisthat"
 DisplayName = "cyberdolphin"
-Icon = ""
+Icon = "dolphin"
