@@ -2,7 +2,7 @@
 name = "cyberdolphin"
 description = "Cyberdolphin nodes for wiring up OpenAI and compatible LLM APIs."
 version = "1.0.0"
-license = "LICENSE"
+license = { file = "LICENSE" }
 dependencies = ["openai ~= 1.2.3", "gradio_client", "numpy", "pillow"]
 
 [project.urls]
